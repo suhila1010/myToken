@@ -1,7 +1,7 @@
 const Token = artifacts.require('./Token');
 require("chai").use(require('chai-as-promised')).should();
 
-contract("Token", ([owner, reciver]) => {
+contract("Token", ([owner, receiver]) => {
     let token;
     beforeEach( async () => {
         token = await Token.new();
@@ -30,33 +30,40 @@ contract("Token", ([owner, reciver]) => {
         })
     });
 
-    describe("Transfare Tokens" , async() => {
+    describe("Transfer Tokens" , async() => {
         it("check token balances", async() => {
-            let balanceof;
-            balanceof = await token.balanceOf(owner)
-            //console.log(`The balance of the owner is ${balanceof}`);
+            let balance_of;
+            balance_of = await token.balanceOf(owner)
+            //console.log(`The balance of the owner is ${balance_of}`);
             
-            balanceof = await token.balanceOf(reciver)
-            //console.log(`The balance of the reciver is ${balanceof}`);
+            balance_of = await token.balanceOf(receiver)
+            //console.log(`The balance of the receiver is ${balance_of}`);
 
-            await token.transfer(reciver,"20000000000000",{from:owner});
+            await token.transfer(receiver,"20000000000000",{from:owner});
 
-            balanceof = await token.balanceOf(owner)
-            //console.log(`The balance of the owner is ${balanceof}`);
+            balance_of = await token.balanceOf(owner)
+            //console.log(`The balance of the owner is ${balance_of}`);
             
-            balanceof = await token.balanceOf(reciver)
-            //console.log(`The balance of the reciver is ${balanceof}`);
+            balance_of = await token.balanceOf(receiver)
+            //console.log(`The balance of the receiver is ${balance_of}`);
         })
 
         it("emit the transfer", async() => {
-            const result = await token.transfer(reciver,"20000000000000",{from:owner});
+            const result = await token.transfer(receiver,"20000000000000",{from:owner});
             //console.log(result);
             const log = result.logs[0];
             log.event.should.equal("Transfer")
-            //log.args._from.should.equal(owner,"This is from correct addres")
+            //log.args._from.should.equal(owner,"This is from correct address")
             //console.log(log.args._from.toString());
 
             log.args._from.toString().should.equal(owner,"This is the owner..")
+        }),
+        it("invalid receiver" , async() =>{
+            await token.transfer(0x0,"20000000000000", {from:owner}).should.be.rejected
         })
+        it("invalid owner balance", async() => {
+            await token.transfer(receiver,"20000000000000", {from:receiver}).should.be.rejected
+        })
+
     })
 })
